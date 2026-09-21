@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -65,5 +66,21 @@ class TransactionController extends Controller
                 'data' => $transaction->load('details.product', 'customer'),
             ], 201);
         });
+    }
+
+    public function index()
+    {
+        return Inertia::render('pos/index', [
+            'products' => Product::where('stock', '>', 0)->get(),
+            'customers' => Customer::all(),
+        ]);
+    }
+    
+    public function checkout(Request $request)
+    {
+        // Memanggil logika transaksi store yang sudah teruji sebelumnya
+        $this->store($request);
+
+        return redirect()->back()->with('success', 'Transaksi berhasil diproses!');
     }
 }
