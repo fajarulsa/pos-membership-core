@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Props = {
     passwordRules: string;
@@ -88,6 +89,21 @@ export default function Register({ passwordRules }: Props) {
                                 <InputError
                                     message={errors.password_confirmation}
                                 />
+                            </div>
+                            
+                            <div className="grid gap-2">
+                                <Label>
+                                    Role
+                                </Label>
+                                <Select name="role" required>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="owner">Owner</SelectItem>
+                                        <SelectItem value="kasir">Kasir</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <Button
