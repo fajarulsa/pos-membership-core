@@ -6,9 +6,12 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use App\Models\CashierShift;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class TransactionController extends Controller
 {
@@ -21,24 +24,37 @@ class TransactionController extends Controller
             'items.*.qty' => 'required|integer|min:1',
         ]);
 
-        return DB::transaction(function () use ($request) {
+        // Ambil shift aktif kasir
+        $activeShift = CashierShift::where('user_id', Auth::id())
+            ->where('status', 'open')
+            ->first();
+
+        if (!$activeShift) {
+            return redirect()->back()->with('error', 'Silakan buka shift terlebih dahulu sebelum melakukan transaksi!');
+        }
+
+        return DB::transaction(function () use ($request, $activeShift) {
             $totalAmount = 0;
             $itemsToInsert = [];
 
             foreach ($request->items as $item) {
-                $product = Product::findOrFail($item['product_id']);
-                $subtotal = $product->price * $item['qty'];
-                $totalAmount += $subtotal;
+            $product = Product::findOrFail($item['product_id']);
 
-                // Potong stok
-                $product->decrement('stock', $item['qty']);
-
-                $itemsToInsert[] = [
-                    'product_id' => $product->id,
-                    'qty' => $item['qty'],
-                    'subtotal' => $subtotal,
-                ];
+            if ($product->stock < $item['qty']) {
+                throw new \Exception("Stok produk {$product->name} tidak mencukupi.");
             }
+
+            $product->decrement('stock', $item['qty']);
+            $subtotal = $product->price * $item['qty'];
+            $totalAmount += $subtotal;
+
+            $itemsToInsert[] = [
+                'product_id' => $product->id,
+                'quantity' => $item['qty'],
+                'price' => $product->price,
+                'subtotal' => $subtotal,
+            ];
+        }
 
             // Hitung poin: 1 poin per kelipatan Rp 10.000
             $pointsEarned = floor($totalAmount / 10000);
@@ -46,6 +62,8 @@ class TransactionController extends Controller
             // Simpan Transaksi
             $transaction = Transaction::create([
                 'customer_id' => $request->customer_id,
+                'cashier_shift_id' => $activeShift->id, // Tambahkan shift ID
+                'invoice_number' => 'TRX-' . strtoupper(Str::random(8)),
                 'total_amount' => $totalAmount,
                 'points_earned' => $pointsEarned,
                 'status' => 'completed',
@@ -70,9 +88,16 @@ class TransactionController extends Controller
 
     public function index()
     {
+        // Cari shift aktif kasir yang sedang login
+        $activeShift = CashierShift::with('mutations')
+            ->where('user_id', Auth::id())
+            ->where('status', 'open')
+            ->first();
+
         return Inertia::render('pos/index', [
             'products' => Product::where('stock', '>', 0)->get(),
             'customers' => Customer::all(),
+            'activeShift' => $activeShift, // Pass data shift ke React
         ]);
     }
     

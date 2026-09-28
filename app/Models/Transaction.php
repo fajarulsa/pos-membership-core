@@ -8,6 +8,20 @@ class Transaction extends Model
 {
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'customer_id',
+        'cashier_shift_id', // <-- Tambahkan ini
+        'invoice_number',
+        'total_amount',
+        'points_earned',
+        'payment_method',
+    ];
+
+    public function shift()
+    {
+        return $this->belongsTo(CashierShift::class, 'cashier_shift_id');
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);
