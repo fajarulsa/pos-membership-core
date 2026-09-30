@@ -9,6 +9,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\Owner\ProductController;
 use App\Http\Controllers\Owner\ReportController;
+use App\Http\Controllers\Owner\CustomerController;
 
 // models
 use App\Models\Product;
@@ -50,9 +51,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-        // Laporan Penjualan & Rekap Shift (Sprint 3)
+        // Laporan Penjualan & Rekap Shift
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        // CRUD Member / Customer
+        Route::get('/customers', [\App\Http\Controllers\Owner\CustomerController::class, 'index'])->name('customers.index');
+        Route::post('/customers', [\App\Http\Controllers\Owner\CustomerController::class, 'store'])->name('customers.store');
+        Route::put('/customers/{customer}', [\App\Http\Controllers\Owner\CustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{customer}', [\App\Http\Controllers\Owner\CustomerController::class, 'destroy'])->name('customers.destroy');
     });
 
 });
