@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\Owner\ProductController;
+use App\Http\Controllers\Owner\ReportController;
 
 // models
 use App\Models\Product;
@@ -48,6 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+        // Laporan Penjualan & Rekap Shift (Sprint 3)
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     });
 
 });
