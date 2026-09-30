@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Download } from 'lucide-react';
 
 interface Transaction {
   id: number;
@@ -47,6 +48,10 @@ export default function ReportsIndex({ transactions, shifts, summary, filters }:
     router.get('/owner/reports', { start_date: startDate, end_date: endDate }, { preserveState: true });
   };
 
+  const handleExport = () => {
+    window.location.href = `/owner/reports/export?start_date=${startDate}&end_date=${endDate}`;
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 p-6">
       <Head title="Laporan & Analytics - Owner" />
@@ -75,6 +80,9 @@ export default function ReportsIndex({ transactions, shifts, summary, filters }:
             />
             <Button type="submit" size="sm">
               Filter Data
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={handleExport} className="flex items-center gap-1 border-emerald-600 text-emerald-700 hover:bg-emerald-50">
+                <Download className="w-3.5 h-3.5" /> Export CSV / Excel
             </Button>
           </form>
         </div>

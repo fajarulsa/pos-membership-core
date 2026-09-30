@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Laporan Penjualan & Rekap Shift (Sprint 3)
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     });
 
 });
